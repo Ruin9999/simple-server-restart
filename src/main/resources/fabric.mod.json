@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "simple-server-restart",
+  "version": "${version}",
+  "name": "simple-server-restart",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/simple-server-restart/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "dev.shunjieyong.simpleServerRestart.SimpleServerRestart"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
