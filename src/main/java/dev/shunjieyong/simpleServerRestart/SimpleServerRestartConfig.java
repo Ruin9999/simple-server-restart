@@ -10,5 +10,6 @@ public class SimpleServerRestartConfig implements ConfigData {
     String restartKickMessage = "The server is restarting...";
 
     @Comment("Set to > 0  to enable restart scheduling")
-    int secondsTillNextRestart = 86400;
+    int secondsTillNextRestart = 20;
+    //Method…86400;
 }

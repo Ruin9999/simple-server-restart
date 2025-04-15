@@ -16,7 +16,7 @@ base {
 modrinth {
     token = System.getenv("modrinth-token")
     projectId = 'simple-server-restart'
-    versionNumber = '1.0.0'
+    versionNumber = '1.0.1'
     versionType = 'release'
     uploadFile = remapJar
     gameVersions = ['1.21.5']

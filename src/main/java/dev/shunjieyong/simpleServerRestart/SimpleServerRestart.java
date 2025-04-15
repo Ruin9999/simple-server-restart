@@ -11,18 +11,17 @@ import org.slf4j.LoggerFactory;
 public class SimpleServerRestart implements ModInitializer {
     public static final String MOD_ID = "simple-server-restart";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private RestartScheduler restartScheduler = null;
 
     @Override
     public void onInitialize() {
         // Register Config
         LOGGER.info("Initializing Simple Server Restart");
         AutoConfig.register(SimpleServerRestartConfig.class, GsonConfigSerializer::new);
+        SimpleServerRestartConfig config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
 
         // Register Events
-        this.restartScheduler = new RestartScheduler();
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> this.restartScheduler.onStart(server));
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.restartScheduler.onStop(server));
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> RestartService.getInstance().restartLater(server, config.secondsTillNextRestart));
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> RestartService.getInstance().shutdown());
 
         //Register Commands
         CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
