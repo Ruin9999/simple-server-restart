@@ -1,23 +1,19 @@
 package dev.shunjieyong.simpleServerRestart;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.shedaniel.autoconfig.AutoConfig;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 
 public class RestartCommand {
+    private static final RestartService service = new RestartService(AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig());
+
     public static LiteralArgumentBuilder<ServerCommandSource> register() {
-        return CommandManager.literal("restart").executes(context -> execute(context.getSource()));
-    }
-
-    public static int execute(ServerCommandSource source) {
-        MinecraftServer server = source.getServer();
-        SimpleServerRestartConfig config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
-
-        server.getPlayerManager().getPlayerList().forEach(player -> player.networkHandler.disconnect(Text.literal(config.restartKickMessage)));
-        server.stop(false);
-        return 1;
+        return CommandManager.literal("restart")
+                .requires(src -> src.hasPermissionLevel(2))
+                .executes(service::restartNow)
+                .then(CommandManager.argument("delaySeconds", IntegerArgumentType.integer(1))
+                        .executes(service::restartLater));
     }
 }

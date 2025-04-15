@@ -1,6 +1,9 @@
+import com.modrinth.minotaur.dependencies.ModDependency
+
 plugins {
     id 'fabric-loom' version '1.10-SNAPSHOT'
     id 'maven-publish'
+    id 'com.modrinth.minotaur' version '2.+'
 }
 
 version = project.mod_version
@@ -10,6 +13,19 @@ base {
     archivesName = project.archives_base_name
 }
 
+modrinth {
+    token = System.getenv("modrinth-token")
+    projectId = 'simple-server-restart'
+    versionNumber = '1.0.0'
+    versionType = 'release'
+    uploadFile = remapJar
+    gameVersions = ['1.21.5']
+    loaders = ['fabric']
+    syncBodyFrom = rootProject.file("README.md").text
+    dependencies = [
+            new ModDependency('P7dR8mSH', 'required')
+    ]
+}
 
 repositories {
     // Add repositories to retrieve artifacts from in here.

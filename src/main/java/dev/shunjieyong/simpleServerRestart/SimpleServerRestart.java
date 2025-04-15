@@ -15,11 +15,12 @@ public class SimpleServerRestart implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        // Register Config
         LOGGER.info("Initializing Simple Server Restart");
-        this.restartScheduler = new RestartScheduler();
-
-        // Register Config and Events
         AutoConfig.register(SimpleServerRestartConfig.class, GsonConfigSerializer::new);
+
+        // Register Events
+        this.restartScheduler = new RestartScheduler();
         ServerLifecycleEvents.SERVER_STARTED.register(server -> this.restartScheduler.onStart(server));
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> this.restartScheduler.onStop(server));
 

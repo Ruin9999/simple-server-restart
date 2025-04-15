@@ -4,41 +4,25 @@ import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.server.MinecraftServer;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class RestartScheduler {
-    private ScheduledExecutorService scheduler = null;
+    private final RestartService service;
+
+    public RestartScheduler() { this.service = new RestartService(AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig()); }
 
     public void onStart(MinecraftServer server) {
-        this.scheduler = Executors.newSingleThreadScheduledExecutor();
-        int secondsTillNextRestart = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig().secondsTillNextRestart;
-
-        if (secondsTillNextRestart < 0) {
-            SimpleServerRestart.LOGGER.warn("Automatic restart is disabled (secondsTillNextRestart < 0)");
-            if (this.scheduler != null) this.scheduler.shutdown();
-            this.scheduler = null;
+        int secondsTillNext = service.config.secondsTillNextRestart;
+        if (secondsTillNext < 0) {
+            SimpleServerRestart.LOGGER.warn("Automatic restart disabled");
             return;
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime scheduledRestartTime = now.plusSeconds(secondsTillNextRestart);
-
-        SimpleServerRestart.LOGGER.info("Restart scheduled at: {}", scheduledRestartTime);
-        scheduler.schedule(() -> server.execute(() -> RestartCommand.execute(server.getCommandSource())), secondsTillNextRestart, TimeUnit.SECONDS);
+        LocalDateTime restartTime = LocalDateTime.now().plusSeconds(secondsTillNext);
+        SimpleServerRestart.LOGGER.info("Restart scheduled at {}", restartTime);
+        service.restartLater(server, secondsTillNext);
     }
 
     public void onStop(MinecraftServer ignored) {
-        if (this.scheduler == null) return;
-        this.scheduler.shutdownNow();
-        try {
-            if (!this.scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
-                SimpleServerRestart.LOGGER.error("Restart scheduler did not terminate cleanly");
-            }
-        } catch (InterruptedException ie) {
-            this.scheduler.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
+        service.shutdown();
     }
 }
