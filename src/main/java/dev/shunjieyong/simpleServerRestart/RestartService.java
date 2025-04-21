@@ -2,7 +2,6 @@ package dev.shunjieyong.simpleServerRestart;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -14,14 +13,12 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class RestartService {
-    private static final RestartService INSTANCE = new RestartService(AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig());
+    private static final RestartService INSTANCE = new RestartService();
 
-    public final SimpleServerRestartConfig config;
     private final ScheduledExecutorService scheduler;
     private ScheduledFuture<?> currentTask = null;
 
-    public RestartService(SimpleServerRestartConfig config) {
-        this.config = config;
+    public RestartService() {
         this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "RestartScheduler");
             t.setDaemon(true);
@@ -33,7 +30,7 @@ public class RestartService {
 
     public int restartNow(CommandContext<ServerCommandSource> context) {
         MinecraftServer server = context.getSource().getServer();
-        RestartHelper.restart(server, config.restartKickMessage);
+        RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage);
         return 1;
     }
 
@@ -52,7 +49,7 @@ public class RestartService {
 
         LocalDateTime restartTime = LocalDateTime.now().plusSeconds(delaySeconds);
         server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
-        currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
+        currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
     }
 
     public void shutdown() {

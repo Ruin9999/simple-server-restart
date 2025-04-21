@@ -14,16 +14,22 @@ base {
 }
 
 modrinth {
+    BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in))
+    System.out.println("Enter the version number: ")
+    versionNumber = buffer.readLine()
+    System.out.println("Enter the version type (release/beta/alpha):")
+    versionType = buffer.readLine()
+    System.out.println("Enter Change log:")
+    changelog = buffer.readLine()
+
     token = System.getenv("modrinth-token")
     projectId = 'simple-server-restart'
-    versionNumber = '1.0.1'
-    versionType = 'release'
-    uploadFile = remapJar
     gameVersions = ['1.21.5']
+    uploadFile = remapJar
     loaders = ['fabric']
     syncBodyFrom = rootProject.file("README.md").text
     dependencies = [
-            new ModDependency('P7dR8mSH', 'required')
+            new ModDependency('P7dR8mSH', 'required') // Fabric API mod dependency
     ]
 }
 
