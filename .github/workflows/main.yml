@@ -49,13 +49,17 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # Validate gradle wrapper
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
-      # Set up build environment
+      # Setup Gradle and validate wrappers.
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
+
+#      # Validate gradle wrapper
+#      - name: Validate Gradle wrapper
+#        uses: gradle/actions/wrapper-validation@v4
+
+#      # Set up build environment
+#      - name: Setup Gradle
+#        uses: gradle/actions/setup-gradle@v3
 
       # Change Gradle wrapper permissions
       - name: Change Gradle wrapper permissions
