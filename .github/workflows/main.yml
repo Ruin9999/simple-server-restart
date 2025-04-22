@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag: # Define an input field for the tag name.
-        description: 'The Git tag (e.g. v1.0.0) to build and publish. Must start with v.'
+        description: 'The Git tag (e.g. 1.0.0) to build and publish.'
         required: true
         type: string
       release-type:
@@ -12,13 +12,7 @@ on:
         required: false
         type: string
         default: 'Release'
-      is-prerelease:
-        description: 'Check this box if this is a pre-release version.'
-        required: false
-        default: false
-  push:
-    tags:
-      - 'v*' # Trigger on pushing tags (e.g., v1.0.0)
+
 jobs:
   build_and_publish: # Referenced from https://github.com/steves-underwater-paradise/restart-server/blob/main/.github/workflows/publish.yml
     runs-on: ubuntu-latest
@@ -76,7 +70,7 @@ jobs:
         uses: Kira-NT/mc-publish@v3.3.0
         with:
           version: ${{ github.event.inputs.tag || github.ref_name }}
-          prerelease: ${{ github.event.inputs.is-prerelease }}
+          version-type: ${{ github.event.inputs.release-type || github.ref_name }}
           changelog: |
             Release Notes for version ${{ github.event.inputs.tag || github.ref_name }}.
             Type: ${{ github.event.inputs.release-type }}.
