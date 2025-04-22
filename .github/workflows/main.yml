@@ -3,6 +3,7 @@ run-name: ${{github.actor}} is publishing the mod/plugin.
 on: [push]
 jobs:
   build:
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
