@@ -63,10 +63,10 @@ jobs:
 
       # Change Gradle wrapper permissions
       - name: Change Gradle wrapper permissions
-        run: chmod +w ./gradlew
+        run: chmod +x gradlew
 
       # Execute Gradle build
-      - name: Execute Grade build
+      - name: Execute Gradle build
         run: ./gradlew build
 
       # Publish
