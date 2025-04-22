@@ -1,18 +1,42 @@
 name: Minecraft Publish
 run-name: ${{github.actor}} is publishing the mod/plugin.
-on: [push]
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on pushing tags (e.g., v1.0.0)
 jobs:
-  build:
+  build_and_publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write # Gemini recommended this, I'm not too sure what this will do.
     steps:
-      - uses: Kira-NT/mc-publish@v3.3.0
+      # Get repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up build environment
+      - name: Setup gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      # Run build command
+      - name: Build project
+        run: |
+          chmod +x gradlew
+          ./gradle
+
+      - name: Publish to Modrinth, CurseForge and Github Releases.
+        uses: Kira-NT/mc-publish@v3.3.0
         with:
+          # Modrinth releases
           modrinth-id: 4Tg7sHEo
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          # Curseforge releases
           curseforge-id: 1249125
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          # Github releases
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
           files: |
