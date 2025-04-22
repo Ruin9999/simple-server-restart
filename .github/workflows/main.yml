@@ -11,7 +11,7 @@ on:
     tags:
       - 'v*' # Trigger on pushing tags (e.g., v1.0.0)
 jobs:
-  build_and_publish:
+  build_and_publish: # Referenced from https://github.com/steves-underwater-paradise/restart-server/blob/main/.github/workflows/publish.yml
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,16 +21,51 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Get mod version from Gradle
+      - name: Get mod version from gradle
+        uses: madhead/read-java-properties@latest
+        id: mod_version
+        with:
+          file: gradle.properties
+          property: mod_version
+          default: 0.0.1
+
+      # Get supported minecraft versions from Gradle
+      - name: Get supported Minecraft versions from Gradle
+        uses: madhead/read-java-properties@latest
+        with:
+          file: gradle.properties
+          property: supported_minecraft_versions
+          default: 0.0.1
+
+      - name: Logging version string
+        run: echo version string ${{ steps.mod_version.outputs.value }}+mc${{ steps.supported_minecraft_version.outputs.value }}
+
+      # Set up Java
+      - name: Set up JDK (Temurin 21)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      # Validate gradle wrapper
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
       # Set up build environment
-      - name: Setup gradle
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      # Run build command
-      - name: Build project
-        run: |
-          chmod +x gradlew
-          ./gradle
+      # Change Gradle wrapper permissions
+      - name: Change Gradle wrapper permissions
+        runs: chmod +w ./gradlew
 
+      # Execute Gradle build
+      - name: Execute Grade build
+        run: ./gradlew build
+
+      # Publish
       - name: Publish to Modrinth, CurseForge and Github Releases.
         uses: Kira-NT/mc-publish@v3.3.0
         with:
