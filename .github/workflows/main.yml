@@ -59,7 +59,7 @@ jobs:
 
       # Change Gradle wrapper permissions
       - name: Change Gradle wrapper permissions
-        runs: chmod +w ./gradlew
+        run: chmod +w ./gradlew
 
       # Execute Gradle build
       - name: Execute Grade build
