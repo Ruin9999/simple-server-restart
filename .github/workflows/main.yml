@@ -1,7 +1,12 @@
 name: Minecraft Publish
 run-name: ${{github.actor}} is publishing the mod/plugin.
 on:
-  workflow-dispatch:
+  workflow_dispatch:
+    inputs:
+      tag: # Define an input field for the tag name.
+        description: 'The Git tag (e.g. v1.0.0) to build and publish. Must start with v.'
+        required: true
+        type: string
   push:
     tags:
       - 'v*' # Trigger on pushing tags (e.g., v1.0.0)
