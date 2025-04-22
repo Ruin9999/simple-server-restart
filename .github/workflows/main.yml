@@ -7,6 +7,15 @@ on:
         description: 'The Git tag (e.g. v1.0.0) to build and publish. Must start with v.'
         required: true
         type: string
+      release-type:
+        description: 'Type of release label (e.g. Release, Beta, Alpha, Hotfix).'
+        required: false
+        type: string
+        default: 'Release'
+      is-prerelease:
+        description: 'Check this box if this is a pre-release version.'
+        required: false
+        default: false
   push:
     tags:
       - 'v*' # Trigger on pushing tags (e.g., v1.0.0)
@@ -20,6 +29,8 @@ jobs:
       # Get repository code
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       # Get mod version from Gradle
       - name: Get mod version from gradle
@@ -53,14 +64,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-#      # Validate gradle wrapper
-#      - name: Validate Gradle wrapper
-#        uses: gradle/actions/wrapper-validation@v4
-
-#      # Set up build environment
-#      - name: Setup Gradle
-#        uses: gradle/actions/setup-gradle@v3
-
       # Change Gradle wrapper permissions
       - name: Change Gradle wrapper permissions
         run: chmod +x gradlew
@@ -73,6 +76,12 @@ jobs:
       - name: Publish to Modrinth, CurseForge and Github Releases.
         uses: Kira-NT/mc-publish@v3.3.0
         with:
+          version: ${{ github.event.inputs.tag || github.ref_name }}
+          prerelease: ${{ github.event.inputs.is-prerelease }}
+          changelog: |
+            Release Notes for version ${{ github.event.inputs.tag || github.ref_name }}.
+            Type: ${{ github.event.inputs.release-type }}.
+
           # Modrinth releases
           modrinth-id: 4Tg7sHEo
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
@@ -87,3 +96,6 @@ jobs:
           files: |
             build/libs/!(*-@(dev|sources|javadoc)).jar
             build/libs/*-@(dev|sources|javadoc).jar
+
+          # Set to true to create a draft release first
+          draft: True
