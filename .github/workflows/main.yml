@@ -1,6 +1,7 @@
 name: Minecraft Publish
 run-name: ${{github.actor}} is publishing the mod/plugin.
 on:
+  workflow-dispatch:
   push:
     tags:
       - 'v*' # Trigger on pushing tags (e.g., v1.0.0)
