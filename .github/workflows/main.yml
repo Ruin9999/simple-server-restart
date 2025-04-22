@@ -44,13 +44,14 @@ jobs:
       # Get supported minecraft versions from Gradle
       - name: Get supported Minecraft versions from Gradle
         uses: madhead/read-java-properties@latest
+        id: mc_version
         with:
           file: gradle.properties
           property: supported_minecraft_versions
           default: 0.0.1
 
       - name: Logging version string
-        run: echo version string ${{ steps.mod_version.outputs.value }}+mc${{ steps.supported_minecraft_version.outputs.value }}
+        run: echo version string ${{ steps.mod_version.outputs.value }}+mc${{ steps.mc_version.outputs.value }}
 
       # Set up Java
       - name: Set up JDK (Temurin 21)
@@ -98,4 +99,4 @@ jobs:
             build/libs/*-@(dev|sources|javadoc).jar
 
           # Set to true to create a draft release first
-          draft: True
+          draft: true
