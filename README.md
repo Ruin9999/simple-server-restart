@@ -1,5 +1,6 @@
 # Simple Server Restart
-A lightweight server plugin to add scheduled restart functionality. Relies on the host restarting the server when stopped.
+A lightweight server plugin to add scheduled restart functionality. 
+Defaults to relying on the host restarting the server when stopped.
 e.g. Pterodactyl starting the server automatically when it goes offline.
 
 [![](https://dcbadge.limes.pink/api/server/https://discord.gg/uyyxyzVq75)](https://discord.gg/https://discord.gg/uyyxyzVq75)
@@ -18,3 +19,5 @@ A: Ensure that `runRestartScript = true` in the config.
 Q: Will you be adding support for different platforms?   
 A: Yes, I am planning to add support for Quilt and Forge
 
+I'm still very new to plugin development so if you have any feedback or additional problems,
+please feel free to contact me via Discord or Github :D

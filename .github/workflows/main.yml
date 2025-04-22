@@ -1,0 +1,17 @@
+name: Minecraft Publish
+run-name: ${{github.actor}} is publishing the mod/plugin.
+on: [push]
+jobs:
+  build:
+    permissions:
+      contents: write
+    steps:
+      - uses: Kira-NT/mc-publish@v3.3.0
+        with:
+          modrinth-id: 4Tg7sHEo
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: 1249125
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          github-token: ${{ secrets.GITHUB_TOKEN }}
