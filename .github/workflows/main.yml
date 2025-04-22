@@ -29,8 +29,6 @@ jobs:
       # Get repository code
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
 
       # Get mod version from Gradle
       - name: Get mod version from gradle
