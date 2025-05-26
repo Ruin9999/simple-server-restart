@@ -89,6 +89,3 @@ jobs:
           files: |
             build/libs/!(*-@(dev|sources|javadoc)).jar
             build/libs/*-@(dev|sources|javadoc).jar
-
-          # Set to true to create a draft release first
-          draft: true
