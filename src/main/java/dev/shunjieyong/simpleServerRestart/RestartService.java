@@ -34,7 +34,7 @@ public class RestartService {
 
         LocalDateTime restartTime = LocalDateTime.now().plusSeconds(delaySeconds);
         SimpleServerRestart.LOGGER.info("Restart scheduled at {}", restartTime);
-        server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
+        if (server.getCommandSource().isExecutedByPlayer()) server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
         currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
     }
 

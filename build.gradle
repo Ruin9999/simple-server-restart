@@ -14,17 +14,9 @@ base {
 }
 
 modrinth {
-//    BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in))
-//    System.out.println("Enter the version number: ")
-//    versionNumber = buffer.readLine()
-//    System.out.println("Enter the version type (release/beta/alpha):")
-//    versionType = buffer.readLine()
-//    System.out.println("Enter Change log:")
-//    changelog = buffer.readLine()
-
-    versionNumber = '0.1.2'
+    versionNumber = '0.1.3'
     versionType = 'beta'
-    changelog = 'No changelog provided.'
+    changelog = 'Fixed a critical issue causing the server to not find the restart scripts.'
     token = System.getenv("modrinth-token")
     projectId = 'simple-server-restart'
     gameVersions = ['1.21.5']

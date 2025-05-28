@@ -19,24 +19,48 @@ public class SimpleServerRestart implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // Register Config
+        registerConfig();
+        registerEvents();
+        registerCommands();
+    }
+
+    private void registerConfig() {
         LOGGER.info("Initializing Simple Server Restart ({})", MOD_ID);
         AutoConfig.register(SimpleServerRestartConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
+    }
 
-        // Register Events
+    private void registerEvents() {
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> restartService.shutdown());
+
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            if (config.secondsTillNextRestart > 0) RestartService.getInstance().scheduleRestart(server, config.secondsTillNextRestart);
+            if (config.secondsTillNextRestart > 0) restartService.scheduleRestart(server, config.secondsTillNextRestart);
             else LOGGER.info("Automatic server restart is disabled in config.");
         });
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> RestartService.getInstance().shutdown());
+
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager) -> {
             AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).load();
             config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
             SimpleServerRestart.LOGGER.info("Reloaded config!");
-        });
 
-        //Register Commands
-        //TODO: REGISTER COMMANDS
+            if (config.rescheduleOnReload) restartService.scheduleRestart(server, config.secondsTillNextRestart);
+        });
+    }
+
+    private void registerCommands() {
+        CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
+            commandDispatcher.register(CommandManager.literal("restart")
+                .requires(src -> src.hasPermissionLevel(2))
+                .executes(ctx -> {
+                    restartService.scheduleRestart(ctx.getSource().getServer(), 1);
+                    return 1;
+                })
+                .then(CommandManager.argument("delayDuration", IntegerArgumentType.integer())
+                    .requires(src -> src.hasPermissionLevel(2))
+                    .executes(ctx -> {
+                        restartService.scheduleRestart(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "delayDuration"));
+                        return 1;
+                    })));
+        }));
     }
 }

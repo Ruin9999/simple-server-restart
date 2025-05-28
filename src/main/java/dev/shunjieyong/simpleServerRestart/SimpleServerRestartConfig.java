@@ -12,6 +12,9 @@ public class SimpleServerRestartConfig implements ConfigData {
     @Comment("Set to true to run a custom restart script, else server restart defaults to just doing /stop.")
     boolean runRestartScript = false;
 
+    @Comment("Set to true to reset the scheduled restart on server reload.")
+    boolean rescheduleOnReload = false;
+
     @Comment("Message that will be displayed on the player's screen when getting kicked.")
     String restartKickMessage = "The server is restarting...";
 

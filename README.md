@@ -1,7 +1,6 @@
 # Simple Server Restart
 A lightweight server plugin to add scheduled restart functionality. 
 Defaults to relying on the host restarting the server when stopped.
-e.g. Pterodactyl starting the server automatically when it goes offline.
 
 [![](https://dcbadge.limes.pink/api/server/https://discord.gg/uyyxyzVq75)](https://discord.gg/https://discord.gg/uyyxyzVq75)
 [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Ruin9999/simple-server-restart)
