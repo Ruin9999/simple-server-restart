@@ -10,7 +10,7 @@ public class SimpleServerRestartConfig implements ConfigData {
     int secondsTillNextRestart = 86400;
 
     @Comment("The restart time in 24 hour time. Does not work if secondsTilNextRestart > 0. Leave blank to disable.")
-    String timedRestartTime = "12:00";
+    String restartTime = "12:00";
     
     @Comment("Set to true to run a custom restart script, else server restart defaults to just doing /stop.")
     boolean runRestartScript = false;
