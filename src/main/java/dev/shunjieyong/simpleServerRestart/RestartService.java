@@ -42,7 +42,7 @@ public class RestartService {
         LocalTime now = LocalTime.now();
         LocalTime targetTime = LocalTime.parse(time);
         if (now.isAfter(targetTime)) targetTime.plusDays(1);
-        int delay = Duration.between(now, targetTime).toSeconds() % 1;
+        int delay = (int) Duration.between(now, targetTime).toSeconds();
         scheduleRestart(server, delay);
     }
 
