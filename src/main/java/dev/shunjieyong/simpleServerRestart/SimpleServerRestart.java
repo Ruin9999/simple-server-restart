@@ -39,7 +39,7 @@ public class SimpleServerRestart implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (config.secondsTillNextRestart > 0) restartService.scheduleRestart(server, config.secondsTillNextRestart);
-            else if (config.timedRestartEnabled == true) restartService.scheduledRestart(server, timedRestartSeconds());
+            else if (config.restartTime != "") restartService.scheduleTimedRestart(server, config.restartTime);
             else LOGGER.info("Automatic server restart is disabled in config.");
         });
 
@@ -67,18 +67,5 @@ public class SimpleServerRestart implements ModInitializer {
                         return 1;
                     })));
         }));
-    }
-
-    private int timedRestartSeconds() {
-        LocalTime now = LocalTime.now()
-        LocalTime targetTime = LocalTime.parse(config.timedRestartTime);
-
-        if (now.isAfter(targetTime)) {
-            targetTime.plusDays(1);
-        }
-
-        Duration duration = Duration.between(now, targetTime);
-
-        return duration.toSeconds();
     }
 }
