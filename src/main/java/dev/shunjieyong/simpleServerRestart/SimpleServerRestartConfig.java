@@ -9,6 +9,9 @@ public class SimpleServerRestartConfig implements ConfigData {
     @Comment("Set to > 0  to enable restart scheduling")
     int secondsTillNextRestart = 86400;
 
+    @Comment("The restart time in 24 hour time. Does not work if secondsTilNextRestart > 0. Leave blank to disable.")
+    String timedRestartTime = "12:00";
+    
     @Comment("Set to true to run a custom restart script, else server restart defaults to just doing /stop.")
     boolean runRestartScript = false;
 
@@ -20,7 +23,4 @@ public class SimpleServerRestartConfig implements ConfigData {
 
     @Comment("The restart executable script path. Path defaults to the server root directory.")
     String restartScriptPath = "start.bat";
-
-    @Comment("The time of day at which to restart the server, in 24 hour time. (e.g. 15:30)")
-    String timedRestartTime = "12:00";
 }
