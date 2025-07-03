@@ -10,6 +10,10 @@ import net.minecraft.server.command.CommandManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalTime;
+import java.time.Duration;
+
+
 public class SimpleServerRestart implements ModInitializer {
     public static final String MOD_ID = "simple-server-restart";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -35,6 +39,7 @@ public class SimpleServerRestart implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (config.secondsTillNextRestart > 0) restartService.scheduleRestart(server, config.secondsTillNextRestart);
+            else if (config.timedRestartEnabled == true) restartService.scheduledRestart(server, timedRestartSeconds());
             else LOGGER.info("Automatic server restart is disabled in config.");
         });
 
@@ -62,5 +67,18 @@ public class SimpleServerRestart implements ModInitializer {
                         return 1;
                     })));
         }));
+    }
+
+    private int timedRestartSeconds() {
+        LocalTime now = LocalTime.now()
+        LocalTime targetTime = LocalTime.parse(config.timedRestartTime);
+
+        if (now.isAfter(targetTime)) {
+            targetTime.plusDays(1);
+        }
+
+        Duration duration = Duration.between(now, targetTime);
+
+        return duration.toSeconds();
     }
 }
