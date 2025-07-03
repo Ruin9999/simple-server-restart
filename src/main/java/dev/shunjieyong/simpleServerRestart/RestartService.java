@@ -38,6 +38,14 @@ public class RestartService {
         currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
     }
 
+    public static void scheduleTimedRestart(MinecraftServer server, string time) {
+        LocalTime now = LocalTime.now();
+        LocalTime targetTime = LocalTime.parse(time);
+        if (now.isAfter(targetTime)) targetTime.plusDays(1);
+        int delay = Duration.between(now, targetTime).toSeconds() % 1;
+        scheduleRestart(server, delay);
+    }
+
     public void shutdown() {
         scheduler.shutdownNow();
     }
