@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import java.time.LocalTime;
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 // Singleton
 public class RestartService {
@@ -42,10 +43,11 @@ public class RestartService {
     }
 
     public void scheduleTimedRestart(MinecraftServer server, String time) {
-        LocalTime now = LocalTime.now();
-        LocalTime targetTime = LocalTime.parse(time);
-        if (now.isAfter(targetTime)) targetTime.plusHours(24);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime targetTime = LocalDateTime.now().with(LocalTime.parse(time));
+        if (now.isAfter(targetTime)) targetTime = targetTime.plusDays(1);
         int delay = (int)Duration.between(now, targetTime).toSeconds();
+
         scheduleRestart(server, delay);
     }
 

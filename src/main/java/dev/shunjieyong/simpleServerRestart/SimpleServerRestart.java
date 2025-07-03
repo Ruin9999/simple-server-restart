@@ -10,8 +10,6 @@ import net.minecraft.server.command.CommandManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalTime;
-import java.time.Duration;
 
 
 public class SimpleServerRestart implements ModInitializer {
@@ -23,13 +21,13 @@ public class SimpleServerRestart implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        LOGGER.info("Initializing Simple Server Restart ({})", MOD_ID);
         registerConfig();
         registerEvents();
         registerCommands();
     }
 
     private void registerConfig() {
-        LOGGER.info("Initializing Simple Server Restart ({})", MOD_ID);
         AutoConfig.register(SimpleServerRestartConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
     }
