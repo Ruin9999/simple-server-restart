@@ -20,4 +20,7 @@ public class SimpleServerRestartConfig implements ConfigData {
 
     @Comment("The restart executable script path. Path defaults to the server root directory.")
     String restartScriptPath = "start.bat";
+
+    @Comment("The time of day at which to restart the server, in 24 hour time. (e.g. 15:30)")
+    String timedRestartTime = "12:00";
 }
