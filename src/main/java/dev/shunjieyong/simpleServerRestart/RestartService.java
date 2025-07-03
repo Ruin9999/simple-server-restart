@@ -9,6 +9,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import java.time.LocalTime;
+import java.time.Duration;
+
 // Singleton
 public class RestartService {
     private static final RestartService INSTANCE = new RestartService();
@@ -38,11 +41,11 @@ public class RestartService {
         currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
     }
 
-    public static void scheduleTimedRestart(MinecraftServer server, string time) {
+    public void scheduleTimedRestart(MinecraftServer server, String time) {
         LocalTime now = LocalTime.now();
         LocalTime targetTime = LocalTime.parse(time);
-        if (now.isAfter(targetTime)) targetTime.plusDays(1);
-        int delay = (int) Duration.between(now, targetTime).toSeconds();
+        if (now.isAfter(targetTime)) targetTime.plusHours(24);
+        int delay = (int)Duration.between(now, targetTime).toSeconds();
         scheduleRestart(server, delay);
     }
 
