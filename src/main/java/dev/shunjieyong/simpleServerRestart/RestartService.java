@@ -10,8 +10,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.time.Duration;
 
 
@@ -42,6 +45,7 @@ public class RestartService {
         SimpleServerRestart.LOGGER.info("Restart scheduled at {}", restartTime);
         if (server.getCommandSource().isExecutedByPlayer()) server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
         currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
+        if (SimpleServerRestart.config.warnPlayers.warnPlayers) scheduleRestartWarnings(server, restartTime);
     }
 
     public void scheduleTimedRestart(MinecraftServer server, String time) {
@@ -74,6 +78,36 @@ public class RestartService {
             SimpleServerRestart.LOGGER.error("No valid times were found.");
             return;
         }
+    }
+
+    public void scheduleRestartWarnings(MinecraftServer server, LocalDateTime restartTime) {
+        String[] intervals = SimpleServerRestart.config.warnPlayers.warnPlayerIntervals;
+        for (String interval : intervals) {
+            Duration duration = setTimeUnit(interval);
+            long delay = Duration.between(LocalDateTime.now(), restartTime.minus(duration)).getSeconds();
+            if (delay > 0) {
+                scheduler.schedule(() -> {
+                    server.getPlayerManager().broadcast(Text.literal(
+                        String.format(SimpleServerRestart.config.warnPlayers.warnPlayerMessage, interval)), false);
+                }, delay, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    // Helper to parse the unit from "5m", "10m", etc.
+    private Duration setTimeUnit(String interval) {
+        ChronoUnit unit;
+        interval = interval.trim().toLowerCase();
+        if (interval.endsWith("h")) {
+            unit = ChronoUnit.HOURS;
+        } else if (interval.endsWith("m")) {
+            unit = ChronoUnit.MINUTES;
+        } else if (interval.endsWith("s")) {
+            unit = ChronoUnit.SECONDS;
+        } else {
+            return Duration.of(Integer.parseInt(interval), ChronoUnit.SECONDS);
+        }
+        return Duration.of(Integer.parseInt(interval, 0, interval.length()-1, 10), unit);
     }
 
     public void shutdown() {
