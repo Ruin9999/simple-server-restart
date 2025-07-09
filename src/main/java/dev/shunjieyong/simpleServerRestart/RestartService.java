@@ -4,14 +4,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
+import java.util.stream.Stream;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.time.Duration;
-import java.time.LocalDateTime;
+
 
 // Singleton
 public class RestartService {
@@ -49,6 +51,29 @@ public class RestartService {
         int delay = (int)Duration.between(now, targetTime).toSeconds();
 
         scheduleRestart(server, delay);
+    }
+
+    public void scheduleTimedRestart(MinecraftServer server, String[] times) {
+        LocalDateTime now = LocalDateTime.now();
+
+        try {
+            LocalDateTime targetTime = Stream.of(times)
+                .map(LocalTime::parse)
+                .map(time -> {
+                    LocalDateTime thisTime = now.with(time);
+                    if (thisTime.isBefore(now)) thisTime = thisTime.plusDays(1);
+                    return thisTime;
+                })
+                .min(Comparator.comparing(time -> Duration.between(now, time).toSeconds()))
+                .orElse(null);
+
+            int delay = (int) Duration.between(now, targetTime).toSeconds();
+            scheduleRestart(server, delay);
+
+        } catch (DateTimeParseException err) {
+            SimpleServerRestart.LOGGER.error("No valid times were found.");
+            return;
+        }
     }
 
     public void shutdown() {

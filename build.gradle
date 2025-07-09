@@ -14,9 +14,9 @@ base {
 }
 
 modrinth {
-    versionNumber = '0.1.3'
+    versionNumber = '0.2.2'
     versionType = 'beta'
-    changelog = 'Fixed a critical issue causing the server to not find the restart scripts.'
+    changelog = 'Arrays of times and timed restarts.'
     token = System.getenv("modrinth-token")
     projectId = 'simple-server-restart'
     gameVersions = ['1.21.5']
