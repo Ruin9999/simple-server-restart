@@ -46,7 +46,7 @@ public class RestartHelper {
             else runRestartScript(command, workingDirectory);
         }
         
-        server.getPlayerManager().getPlayerList().forEach(player -> player.networkHandler.disconnect(Text.literal(kickMessage)));
+        if (!SimpleServerRestart.config.runRestartScript) server.getPlayerManager().getPlayerList().forEach(player -> player.networkHandler.disconnect(Text.literal(kickMessage)));
         server.stop(false);
     }
 

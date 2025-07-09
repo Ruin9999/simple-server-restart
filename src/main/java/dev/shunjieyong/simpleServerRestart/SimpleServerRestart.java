@@ -61,16 +61,18 @@ public class SimpleServerRestart implements ModInitializer {
                     restartService.scheduleRestart(ctx.getSource().getServer(), 1);
                     return 1;
                 })
-                .then(CommandManager.argument("time", StringArgumentType.string())
-                    .executes(ctx -> {
-                        restartService.scheduleTimedRestart(ctx.getSource().getServer(), StringArgumentType.getString(ctx, "time"));
-                        return 1;
-                    }))
-                .then(CommandManager.argument("delayDuration", IntegerArgumentType.integer())
-                    .executes(ctx -> {
-                        restartService.scheduleRestart(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "delayDuration"));
-                        return 1;
-                    })));
+                .then(CommandManager.literal("time")
+                    .then(CommandManager.argument("time", StringArgumentType.string())
+                        .executes(ctx -> {
+                            restartService.scheduleTimedRestart(ctx.getSource().getServer(), StringArgumentType.getString(ctx, "time"));
+                            return 1;
+                        })))
+                .then(CommandManager.literal("delay")
+                    .then(CommandManager.argument("delaySeconds", IntegerArgumentType.integer())
+                        .executes(ctx -> {
+                            restartService.scheduleRestart(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "delaySeconds"));
+                            return 1;
+                        }))));
         }));
         LOGGER.info("Commands registered!");
     }
