@@ -43,7 +43,16 @@ public class RestartService {
 
         LocalDateTime restartTime = LocalDateTime.now().plusSeconds(delaySeconds);
         SimpleServerRestart.LOGGER.info("Restart scheduled at {}", restartTime);
-        if (server.getCommandSource().isExecutedByPlayer()) server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
+        
+        // FIX: Add null check for command source to prevent NPE
+        try {
+            if (server.getCommandSource() != null && server.getCommandSource().isExecutedByPlayer()) {
+                server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
+            }
+        } catch (Exception e) {
+            SimpleServerRestart.LOGGER.warn("Failed to send restart confirmation to player: {}", e.getMessage());
+        }
+        
         currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
         if (SimpleServerRestart.config.warnPlayers.warnPlayers) scheduleRestartWarnings(server, restartTime);
     }
@@ -83,21 +92,39 @@ public class RestartService {
     public void scheduleRestartWarnings(MinecraftServer server, LocalDateTime restartTime) {
         String[] intervals = SimpleServerRestart.config.warnPlayers.warnPlayerIntervals;
         for (String interval : intervals) {
-            Duration duration = setTimeUnit(interval);
-            long delay = Duration.between(LocalDateTime.now(), restartTime.minus(duration)).getSeconds();
-            if (delay > 0) {
-                scheduler.schedule(() -> {
-                    server.getPlayerManager().broadcast(Text.literal(
-                        String.format(SimpleServerRestart.config.warnPlayers.warnPlayerMessage, interval)), false);
-                }, delay, TimeUnit.SECONDS);
+            if (interval == null || interval.trim().isEmpty()) {
+                continue; // Skip null or empty intervals
+            }
+            
+            try {
+                Duration duration = setTimeUnit(interval);
+                long delay = Duration.between(LocalDateTime.now(), restartTime.minus(duration)).getSeconds();
+                if (delay > 0) {
+                    scheduler.schedule(() -> {
+                        server.getPlayerManager().broadcast(Text.literal(
+                            String.format(SimpleServerRestart.config.warnPlayers.warnPlayerMessage, interval)), false);
+                    }, delay, TimeUnit.SECONDS);
+                }
+            } catch (Exception e) {
+                SimpleServerRestart.LOGGER.warn("Failed to schedule warning for interval '{}': {}", interval, e.getMessage());
             }
         }
     }
 
     // Helper to parse the unit from "5m", "10m", etc.
     private Duration setTimeUnit(String interval) {
+        if (interval == null || interval.trim().isEmpty()) {
+            throw new IllegalArgumentException("Interval cannot be null or empty");
+        }
+        
         ChronoUnit unit;
         interval = interval.trim().toLowerCase();
+        
+        // FIX: Validate interval length to prevent StringIndexOutOfBoundsException
+        if (interval.length() == 0) {
+            throw new IllegalArgumentException("Interval cannot be empty after trimming");
+        }
+        
         if (interval.endsWith("h")) {
             unit = ChronoUnit.HOURS;
         } else if (interval.endsWith("m")) {
@@ -105,9 +132,27 @@ public class RestartService {
         } else if (interval.endsWith("s")) {
             unit = ChronoUnit.SECONDS;
         } else {
-            return Duration.of(Integer.parseInt(interval), ChronoUnit.SECONDS);
+            // If no unit specified, assume seconds
+            try {
+                return Duration.of(Integer.parseInt(interval), ChronoUnit.SECONDS);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid interval format: " + interval, e);
+            }
         }
-        return Duration.of(Integer.parseInt(interval, 0, interval.length()-1, 10), unit);
+        
+        try {
+            // FIX: Proper bounds checking before substring operation
+            String numberPart = interval.substring(0, interval.length() - 1);
+            int value = Integer.parseInt(numberPart);
+            
+            if (value <= 0) {
+                throw new IllegalArgumentException("Interval value must be positive: " + value);
+            }
+            
+            return Duration.of(value, unit);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid number in interval: " + interval, e);
+        }
     }
 
     public void shutdown() {

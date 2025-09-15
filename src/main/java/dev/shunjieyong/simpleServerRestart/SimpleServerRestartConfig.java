@@ -61,14 +61,48 @@ public class SimpleServerRestartConfig implements ConfigData {
         }
 
 
-        // I'll fix this up later to correctly validate the warn intervals.
-        warnPlayers.warnPlayerIntervals = Stream.of(warnPlayers.warnPlayerIntervals)
-            .map(interval -> {
-                char lastChar = interval.charAt(interval.length() - 1);
-                if (!(lastChar == 'm' || lastChar == 's' || lastChar == 'h')) return null;
-                else return interval;
-            })
-            .toArray(String[]::new);
+        // FIX: Improved validation with proper null handling and error reporting
+        try {
+            warnPlayers.warnPlayerIntervals = Stream.of(warnPlayers.warnPlayerIntervals)
+                .filter(interval -> interval != null && !interval.trim().isEmpty()) // Filter out null/empty
+                .map(interval -> {
+                    interval = interval.trim().toLowerCase();
+                    
+                    // Validate format
+                    if (interval.length() == 0) return null;
+                    
+                    char lastChar = interval.charAt(interval.length() - 1);
+                    if (!(lastChar == 'm' || lastChar == 's' || lastChar == 'h')) {
+                        // Log invalid interval for debugging
+                        SimpleServerRestart.LOGGER.warn("Invalid warning interval format (missing unit): '{}'", interval);
+                        return null;
+                    }
+                    
+                    // Validate the numeric part
+                    try {
+                        String numberPart = interval.substring(0, interval.length() - 1);
+                        int value = Integer.parseInt(numberPart);
+                        
+                        if (value <= 0) {
+                            SimpleServerRestart.LOGGER.warn("Invalid warning interval (non-positive value): '{}'", interval);
+                            return null;
+                        }
+                        
+                        return interval;
+                        
+                    } catch (NumberFormatException e) {
+                        SimpleServerRestart.LOGGER.warn("Invalid warning interval (invalid number): '{}'", interval);
+                        return null;
+                    }
+                })
+                .filter(interval -> interval != null) // Remove null values after validation
+                .toArray(String[]::new);
+                
+        } catch (Exception e) {
+            SimpleServerRestart.LOGGER.error("Error validating warning intervals: {}", e.getMessage(), e);
+            // Fall back to default intervals
+            warnPlayers.warnPlayerIntervals = new String[]{"5m", "1m", "30s", "10s", "5s"};
+        }
     }
 
 }
