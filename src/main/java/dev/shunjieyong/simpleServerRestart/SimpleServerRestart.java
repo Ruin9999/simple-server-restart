@@ -39,17 +39,31 @@ public class SimpleServerRestart implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> restartService.shutdown());
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            if (config.secondsTillNextRestart > 0) restartService.scheduleRestart(server, config.secondsTillNextRestart);
-            else if (config.restartTimes.length != 0) restartService.scheduleTimedRestart(server, config.restartTimes);
-            else LOGGER.info("Automatic server restart is disabled in config.");
+            try {
+                if (config.secondsTillNextRestart > 0) {
+                    restartService.scheduleRestart(server, config.secondsTillNextRestart);
+                } else if (config.restartTimes != null && config.restartTimes.length != 0) {
+                    restartService.scheduleTimedRestart(server, config.restartTimes);
+                } else {
+                    LOGGER.info("Automatic server restart is disabled in config.");
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to schedule restart on server start: {}", e.getMessage(), e);
+            }
         });
 
         ServerLifecycleEvents.START_DATA_PACK_RELOAD.register((server, resourceManager) -> {
-            AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).load();
-            config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
-            SimpleServerRestart.LOGGER.info("Reloaded config!");
+            try {
+                AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).load();
+                config = AutoConfig.getConfigHolder(SimpleServerRestartConfig.class).getConfig();
+                SimpleServerRestart.LOGGER.info("Reloaded config!");
 
-            if (config.rescheduleOnReload) restartService.scheduleRestart(server, config.secondsTillNextRestart);
+                if (config.rescheduleOnReload && config.secondsTillNextRestart > 0) {
+                    restartService.scheduleRestart(server, config.secondsTillNextRestart);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to reload config: {}", e.getMessage(), e);
+            }
         });
     }
 
@@ -64,14 +78,26 @@ public class SimpleServerRestart implements ModInitializer {
                 .then(CommandManager.literal("time")
                     .then(CommandManager.argument("time", StringArgumentType.string())
                         .executes(ctx -> {
-                            restartService.scheduleTimedRestart(ctx.getSource().getServer(), StringArgumentType.getString(ctx, "time"));
-                            return 1;
+                            try {
+                                String timeArg = StringArgumentType.getString(ctx, "time");
+                                restartService.scheduleTimedRestart(ctx.getSource().getServer(), timeArg);
+                                return 1;
+                            } catch (Exception e) {
+                                LOGGER.error("Failed to schedule timed restart: {}", e.getMessage(), e);
+                                return 0;
+                            }
                         })))
                 .then(CommandManager.literal("delay")
-                    .then(CommandManager.argument("delaySeconds", IntegerArgumentType.integer())
+                    .then(CommandManager.argument("delaySeconds", IntegerArgumentType.integer(1))
                         .executes(ctx -> {
-                            restartService.scheduleRestart(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "delaySeconds"));
-                            return 1;
+                            try {
+                                int delay = IntegerArgumentType.getInteger(ctx, "delaySeconds");
+                                restartService.scheduleRestart(ctx.getSource().getServer(), delay);
+                                return 1;
+                            } catch (Exception e) {
+                                LOGGER.error("Failed to schedule delayed restart: {}", e.getMessage(), e);
+                                return 0;
+                            }
                         }))));
         }));
         LOGGER.info("Commands registered!");
