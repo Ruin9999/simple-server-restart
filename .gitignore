@@ -38,6 +38,13 @@ runs/
 logs/
 *.log
 
+# === Test Artifacts ===
+# Ignore test output and reports
+test-reports/
+test-results/
+**/test-restart*.sh
+**/test-restart*.bat
+
 # === Miscellaneous ===
 # Ignore temporary files
 *.tmp

@@ -1,7 +1,7 @@
 import com.modrinth.minotaur.dependencies.ModDependency
 
 plugins {
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'fabric-loom' version '1.4.5'
     id 'maven-publish'
     id 'com.modrinth.minotaur' version '2.+'
 }
@@ -45,6 +45,11 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modApi "me.shedaniel.cloth:cloth-config-fabric:18.0.145"
+    
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testImplementation 'org.mockito:mockito-core:5.1.1'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.1.1'
 }
 
 processResources {
@@ -87,6 +92,11 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
+}
+
+// Enable JUnit tests
+test {
+    useJUnitPlatform()
 }
 
 // configure the maven publication
