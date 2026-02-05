@@ -7,6 +7,8 @@ import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.command.permission.Permission;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.CommandManager;
 
 import org.slf4j.Logger;
@@ -56,7 +58,7 @@ public class SimpleServerRestart implements ModInitializer {
     private void registerCommands() {
         CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
             commandDispatcher.register(CommandManager.literal("restart")
-                .requires(src -> src.hasPermissionLevel(2))
+                .requires(src -> src.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS)))
                 .executes(ctx -> {
                     restartService.scheduleRestart(ctx.getSource().getServer(), 1);
                     return 1;
