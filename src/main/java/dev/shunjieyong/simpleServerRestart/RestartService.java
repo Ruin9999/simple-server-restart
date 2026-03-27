@@ -1,7 +1,7 @@
 package dev.shunjieyong.simpleServerRestart;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -43,7 +43,7 @@ public class RestartService {
 
         LocalDateTime restartTime = LocalDateTime.now().plusSeconds(delaySeconds);
         SimpleServerRestart.LOGGER.info("Restart scheduled at {}", restartTime);
-        if (server.getCommandSource().isExecutedByPlayer()) server.getCommandSource().sendFeedback(() -> Text.literal("Restart scheduled at " + restartTime), true);
+        if (server.createCommandSourceStack().isPlayer()) server.createCommandSourceStack().sendSuccess(() -> Component.literal("Restart scheduled at " + restartTime), true);
         currentTask = scheduler.schedule(() -> server.execute(() -> RestartHelper.restart(server, SimpleServerRestart.config.restartKickMessage)), delaySeconds, TimeUnit.SECONDS);
         if (SimpleServerRestart.config.warnPlayers.warnPlayers) scheduleRestartWarnings(server, restartTime);
     }
@@ -83,11 +83,11 @@ public class RestartService {
     public void scheduleRestartWarnings(MinecraftServer server, LocalDateTime restartTime) {
         String[] intervals = SimpleServerRestart.config.warnPlayers.warnPlayerIntervals;
         for (String interval : intervals) {
-            Duration duration = setTimeUnit(interval);
+            Duration duration = parseTimeInterval(interval);
             long delay = Duration.between(LocalDateTime.now(), restartTime.minus(duration)).getSeconds();
             if (delay > 0) {
                 scheduler.schedule(() -> {
-                    server.getPlayerManager().broadcast(Text.literal(
+                    server.getPlayerList().broadcastSystemMessage(Component.literal(
                         String.format(SimpleServerRestart.config.warnPlayers.warnPlayerMessage, interval)), false);
                 }, delay, TimeUnit.SECONDS);
             }
@@ -95,7 +95,7 @@ public class RestartService {
     }
 
     // Helper to parse the unit from "5m", "10m", etc.
-    private Duration setTimeUnit(String interval) {
+    static Duration parseTimeInterval(String interval) {
         ChronoUnit unit;
         interval = interval.trim().toLowerCase();
         if (interval.endsWith("h")) {

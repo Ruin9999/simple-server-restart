@@ -1,7 +1,7 @@
 import com.modrinth.minotaur.dependencies.ModDependency
 
 plugins {
-    id 'fabric-loom' version '1.15.3'
+    id 'net.fabricmc.fabric-loom' version '1.15'
     id 'maven-publish'
     id 'com.modrinth.minotaur' version '2.+'
 }
@@ -14,13 +14,13 @@ base {
 }
 
 modrinth {
-    versionNumber = '0.2.2'
+    versionNumber = project.mod_version
     versionType = 'beta'
-    changelog = 'Arrays of times and timed restarts.'
+    changelog = 'Updated to Minecraft 26.1.'
     token = System.getenv("modrinth-token")
     projectId = 'simple-server-restart'
-    gameVersions = ['1.21.11']
-    uploadFile = remapJar
+    gameVersions = ['26.1']
+    uploadFile = jar
     loaders = ['fabric']
     syncBodyFrom = rootProject.file("README.md").text
     dependencies = [
@@ -41,10 +41,16 @@ repositories {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modApi "me.shedaniel.cloth:cloth-config-fabric:21.11.153"
+    // No mappings needed - Minecraft 26.1 is unobfuscated
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter:5.12.2"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 processResources {
@@ -60,7 +66,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = 25
 tasks.withType(JavaCompile).configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly
@@ -87,6 +93,10 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // configure the maven publication
