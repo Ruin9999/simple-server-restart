@@ -8,8 +8,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.permission.Permission;
-import net.minecraft.commands.permission.PermissionLevel;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.network.chat.Component;
 
 import org.slf4j.Logger;
