@@ -7,9 +7,10 @@ import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionLevel;
-import net.minecraft.server.command.CommandManager;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.network.chat.Component;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,20 +58,20 @@ public class SimpleServerRestart implements ModInitializer {
 
     private void registerCommands() {
         CommandRegistrationCallback.EVENT.register(((commandDispatcher, commandRegistryAccess, registrationEnvironment) -> {
-            commandDispatcher.register(CommandManager.literal("restart")
-                .requires(src -> src.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS)))
+            commandDispatcher.register(Commands.literal("restart")
+                .requires(src -> src.permissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS)))
                 .executes(ctx -> {
                     restartService.scheduleRestart(ctx.getSource().getServer(), 1);
                     return 1;
                 })
-                .then(CommandManager.literal("time")
-                    .then(CommandManager.argument("time", StringArgumentType.string())
+                .then(Commands.literal("time")
+                    .then(Commands.argument("time", StringArgumentType.string())
                         .executes(ctx -> {
                             restartService.scheduleTimedRestart(ctx.getSource().getServer(), StringArgumentType.getString(ctx, "time"));
                             return 1;
                         })))
-                .then(CommandManager.literal("delay")
-                    .then(CommandManager.argument("delaySeconds", IntegerArgumentType.integer())
+                .then(Commands.literal("delay")
+                    .then(Commands.argument("delaySeconds", IntegerArgumentType.integer())
                         .executes(ctx -> {
                             restartService.scheduleRestart(ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "delaySeconds"));
                             return 1;

@@ -1,7 +1,7 @@
 package dev.shunjieyong.simpleServerRestart;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,14 +40,14 @@ public class RestartHelper {
                 return;
             }
 
-            server.getPlayerManager().getPlayerList().forEach(player -> player.networkHandler.disconnect(Text.literal(kickMessage)));
+            server.getPlayerList().getPlayers().forEach(player -> player.connection.disconnect(Component.literal(kickMessage)));
 
             if (SimpleServerRestart.config.stopServer) Runtime.getRuntime().addShutdownHook(new Thread(() -> runRestartScript(command, workingDirectory)));
             else runRestartScript(command, workingDirectory);
         }
-        
-        if (!SimpleServerRestart.config.runRestartScript) server.getPlayerManager().getPlayerList().forEach(player -> player.networkHandler.disconnect(Text.literal(kickMessage)));
-        server.stop(false);
+
+        if (!SimpleServerRestart.config.runRestartScript) server.getPlayerList().getPlayers().forEach(player -> player.connection.disconnect(Component.literal(kickMessage)));
+        server.halt(false);
     }
 
     public static void runRestartScript(String[] command, Path workingDirectory) {
@@ -64,4 +64,3 @@ public class RestartHelper {
     }
 
 }
-
